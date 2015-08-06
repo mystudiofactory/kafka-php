@@ -91,6 +91,14 @@ class Socket
      */
     private $port = -1;
 
+    /**
+     * Socket buffer size
+     *
+     * @var mixed
+     * @access private
+     */
+    private $writeBufferSize = null;
+
     // }}}
     // {{{ functions
     // {{{ public function __construct()
@@ -101,10 +109,11 @@ class Socket
      * @access public
      * @return void
      */
-    public function __construct($host, $port, $recvTimeoutSec = 0, $recvTimeoutUsec = 750000, $sendTimeoutSec = 0, $sendTimeoutUsec = 100000)
+    public function __construct($host, $port, $writeBufferSize, $recvTimeoutSec = 0, $recvTimeoutUsec = 750000, $sendTimeoutSec = 0, $sendTimeoutUsec = 100000)
     {
         $this->host = $host;
         $this->port = $port;
+        $this->writeBufferSize = $writeBufferSize;
         $this->recvTimeoutSec  = $recvTimeoutSec;
         $this->recvTimeoutUsec = $recvTimeoutUsec;
         $this->sendTimeoutSec  = $sendTimeoutSec;
@@ -293,7 +302,12 @@ class Socket
             $writable = stream_select($null, $write, $null, $this->sendTimeoutSec, $this->sendTimeoutUsec);
             if ($writable > 0) {
                 // write remaining buffer bytes to stream
-                $wrote = fwrite($this->stream, substr($buf, $written));
+                if ($this->writeBufferSize) {
+                    $toWrite = substr($buf, $written, $this->writeBufferSize);
+                } else {
+                    $toWrite = substr($buf, $written);
+                }
+                $wrote = fwrite($this->stream, $toWrite);
                 if ($wrote === -1 || $wrote === false) {
                     throw new \Kafka\Exception\Socket('Could not write ' . strlen($buf) . ' bytes to stream, completed writing only ' . $written . ' bytes');
                 }

@@ -49,6 +49,14 @@ class Client
     private $hostList = array();
 
     /**
+     * buffer size
+     *
+     * @var array
+     * @access private
+     */
+    private $writeBufferSize = null;
+
+    /**
      * save broker connection
      *
      * @var array
@@ -66,12 +74,13 @@ class Client
      * @access public
      * @return void
      */
-    public function __construct(ClusterMetaData $metadata)
+    public function __construct(ClusterMetaData $metadata, $writeBufferSize = null)
     {
         $this->metadata = $metadata;
         if (method_exists($metadata, 'setClient')) {
             $this->metadata->setClient($this);
         }
+        $this->writeBufferSize = $writeBufferSize;
     }
 
     // }}}
@@ -173,7 +182,7 @@ class Client
         }
 
         // no idle stream
-        $stream = new \Kafka\Socket($hostname, $port);
+        $stream = new \Kafka\Socket($hostname, $port, $this->writeBufferSize);
         $stream->connect();
         self::$stream[$host][$lockKey] = array(
             'locked' => true,
