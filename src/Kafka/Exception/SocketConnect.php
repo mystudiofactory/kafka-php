@@ -18,16 +18,16 @@ use \Kafka\Exception;
 
 /**
 +------------------------------------------------------------------------------
-* Kafka php client exception
+ * Kafka php client exception
 +------------------------------------------------------------------------------
-*
-* @package
-* @version $_SWANBR_VERSION_$
-* @copyright Copyleft
-* @author $_SWANBR_AUTHOR_$
+ *
+ * @package
+ * @version $_SWANBR_VERSION_$
+ * @copyright Copyleft
+ * @author $_SWANBR_AUTHOR_$
 +------------------------------------------------------------------------------
-*/
+ */
 
-class Socket extends Exception
+class SocketConnect extends Socket
 {
 }

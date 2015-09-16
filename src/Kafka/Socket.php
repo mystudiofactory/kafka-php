@@ -109,16 +109,50 @@ class Socket
      * @access public
      * @return void
      */
-    public function __construct($host, $port, $writeBufferSize, $recvTimeoutSec = 0, $recvTimeoutUsec = 750000, $sendTimeoutSec = 0, $sendTimeoutUsec = 100000)
+    function __construct($host, $port, $writeBufferSize, $recvTimeoutSec = 0, $recvTimeoutUsec = 750000, $sendTimeoutSec = 0, $sendTimeoutUsec = 100000)
     {
         $this->host = $host;
         $this->port = $port;
         $this->writeBufferSize = $writeBufferSize;
-        $this->recvTimeoutSec  = $recvTimeoutSec;
-        $this->recvTimeoutUsec = $recvTimeoutUsec;
-        $this->sendTimeoutSec  = $sendTimeoutSec;
+        $this->setRecvTimeoutSec($recvTimeoutSec);
+        $this->setRecvTimeoutUsec($recvTimeoutUsec);
+        $this->setSendTimeoutSec($sendTimeoutSec);
+        $this->setSendTimeoutUsec($sendTimeoutUsec);
+    }
+
+    /**
+     * @param float $sendTimeoutSec
+     */
+    public function setSendTimeoutSec($sendTimeoutSec)
+    {
+        $this->sendTimeoutSec = $sendTimeoutSec;
+    }
+
+    /**
+     * @param float $sendTimeoutUsec
+     */
+    public function setSendTimeoutUsec($sendTimeoutUsec)
+    {
         $this->sendTimeoutUsec = $sendTimeoutUsec;
     }
+
+    /**
+     * @param float $recvTimeoutSec
+     */
+    public function setRecvTimeoutSec($recvTimeoutSec)
+    {
+        $this->recvTimeoutSec = $recvTimeoutSec;
+    }
+
+    /**
+     * @param float $recvTimeoutUsec
+     */
+    public function setRecvTimeoutUsec($recvTimeoutUsec)
+    {
+        $this->recvTimeoutUsec = $recvTimeoutUsec;
+    }
+
+
 
     // }}}
     // {{{ public static function createFromStream()
@@ -186,7 +220,7 @@ class Socket
             $error = 'Could not connect to '
                     . $this->host . ':' . $this->port
                     . ' ('.$errstr.' ['.$errno.'])';
-            throw new \Kafka\Exception($error);
+            throw new \Kafka\Exception\SocketConnect($error);
         }
 
         stream_set_blocking($this->stream, 0);
