@@ -255,6 +255,78 @@ class Offset
         }
     }
 
+    /**
+     * get consumer offset
+     *
+     * @param integer $defaultOffset
+     *   if defaultOffset -1 instead of early offset
+     *   if defaultOffset -2 instead of last offset
+     * @access public
+     * @return void
+     */
+    public function getRawOffset($defaultOffset = self::DEFAULT_LAST)
+    {
+        $data = array(
+            'group_id' => $this->groupId,
+            'data' => array(
+                array(
+                    'topic_name' => $this->topicName,
+                    'partitions' => array(
+                        array(
+                            'partition_id' => $this->partitionId,
+                        ),
+                    ),
+                ),
+            ),
+        );
+
+        $this->encoder->fetchOffsetRequest($data);
+        $result = $this->decoder->fetchOffsetResponse();
+        $this->client->freeStream($this->streamKey);
+
+        $topicName = $this->topicName;
+        $partitionId = $this->partitionId;
+        if (!isset($result[$topicName][$partitionId]['errCode'])) {
+            throw new \Kafka\Exception('fetch topic offset failed.');
+        }
+        if ($result[$topicName][$partitionId]['errCode'] == 3) {
+            $offset = $result[$topicName][$partitionId]['offset'];
+            if ($offset == -1) {
+                return $offset;
+            }
+            switch ($defaultOffset) {
+                case self::DEFAULT_LAST:
+                    return $maxOffset;
+                    Log::log("topic name: $topicName, partitionId: $partitionId, get offset value is default last.", LOG_INFO);
+                case self::DEFAULT_EARLY:
+                    Log::log("topic name: $topicName, partitionId: $partitionId, get offset value is default early.", LOG_INFO);
+                    return $minOffset;
+                default:
+                    $this->setOffset($defaultOffset);
+                    Log::log("topic name: $topicName, partitionId: $partitionId, get offset value is default $defaultOffset.", LOG_INFO);
+                    return $defaultOffset;
+            }
+            if ($defaultOffset) {
+                $this->setOffset($defaultOffset);
+                return $defaultOffset;
+            }
+        } elseif ($result[$topicName][$partitionId]['errCode'] == 0) {
+            $offset = $result[$topicName][$partitionId]['offset'];
+            if ($offset > $maxOffset || $offset < $minOffset) {
+                if ($defaultOffset == self::DEFAULT_EARLY) {
+                    $offset = $minOffset;
+                } else {
+                    $offset = $maxOffset;
+                }
+            }
+            Log::log("topic name: $topicName, partitionId: $partitionId, get offset value is $offset.", LOG_INFO);
+
+            return $offset;
+        } else {
+            throw new \Kafka\Exception(\Kafka\Protocol\Decoder::getError($result[$topicName][$partitionId]['errCode']));
+        }
+    }
+
     // }}}
     // {{{ public function getProduceOffset()
 
