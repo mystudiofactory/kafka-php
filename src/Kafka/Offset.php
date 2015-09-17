@@ -266,6 +266,8 @@ class Offset
      */
     public function getRawOffset($defaultOffset = self::DEFAULT_LAST)
     {
+        $maxOffset = $this->getProduceOffset(self::LAST_OFFSET);
+        $minOffset = $this->getProduceOffset(self::EARLIEST_OFFSET);
         $data = array(
             'group_id' => $this->groupId,
             'data' => array(
