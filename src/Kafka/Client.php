@@ -252,11 +252,7 @@ class Client
         }
 
         // no idle stream
-<<<<<<< HEAD
-        $stream = new \Kafka\Socket($hostname, $port, $this->writeBufferSize);
-=======
-        $stream = new \Kafka\Socket($hostname, $port, $this->getStreamOption('RecvTimeoutSec'), $this->getStreamOption('RecvTimeoutUsec'), $this->getStreamOption('SendTimeoutSec'), $this->getStreamOption('SendTimeoutUsec'));
->>>>>>> 12d4f2f4fc487e5629d5fd8dcdc5ff4329123427
+        $stream = new \Kafka\Socket($hostname, $port, $this->writeBufferSize, $this->getStreamOption('RecvTimeoutSec'), $this->getStreamOption('RecvTimeoutUsec'), $this->getStreamOption('SendTimeoutSec'), $this->getStreamOption('SendTimeoutUsec'));
         $stream->connect();
         self::$stream[$host][$lockKey] = array(
             'locked' => true,
