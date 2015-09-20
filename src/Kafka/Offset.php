@@ -325,6 +325,9 @@ class Offset
 
             return $offset;
         } else {
+            $offset = $result[$topicName][$partitionId]['offset'];
+
+            return $offset;
             throw new \Kafka\Exception(\Kafka\Protocol\Decoder::getError($result[$topicName][$partitionId]['errCode']));
         }
     }
