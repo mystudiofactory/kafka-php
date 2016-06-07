@@ -32,6 +32,8 @@ class Socket
 
     const READ_MAX_LEN = 5242880; // read socket max length 5MB
 
+    const MAX_WRITE_ATTEMPTS = 3;
+
     // }}}
     // {{{ members
 
@@ -341,10 +343,22 @@ class Socket
                 } else {
                     $toWrite = substr($buf, $written);
                 }
-                $wrote = fwrite($this->stream, $toWrite);
-                if ($wrote === -1 || $wrote === false) {
-                    throw new \Kafka\Exception\Socket('Could not write ' . strlen($buf) . ' bytes to stream, completed writing only ' . $written . ' bytes');
-                }
+                $attempts = 0;
+                do {
+                    $retry = false;
+                    $wrote = fwrite($this->stream, $toWrite);
+                    if ($wrote === -1 || $wrote === false || $wrote === 0) {
+                        if ($attempts > self::MAX_WRITE_ATTEMPTS) {
+                            throw new \Kafka\Exception\SocketConnect(sprintf('Enable to write to kafka after %d attempts. Connexion has been dropped.', $attempts));
+                        }
+                        // Try to close the stream and connect again
+                        $this->close();
+                        sleep($attempts * 5);
+                        $this->connect();
+                        $retry = true;
+                        $attempts++;
+                    }
+                } while($retry);
                 $written += $wrote;
                 continue;
             }
