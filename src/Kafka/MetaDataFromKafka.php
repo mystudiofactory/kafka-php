@@ -171,19 +171,26 @@ class MetaDataFromKafka implements ClusterMetaData
         }
         $response = null;
         foreach ($this->hostList as $host) {
-            try {
-                $response = null;
-                $stream = $this->client->getStream($host);
-                $conn = $stream['stream'];
-                $encoder = new \Kafka\Protocol\Encoder($conn);
-                $encoder->metadataRequest($topics);
-                $decoder = new \Kafka\Protocol\Decoder($conn);
-                $response = $decoder->metadataResponse();
-                $this->client->freeStream($stream['key']);
-                break;
-            } catch (\Kafka\Exception $e) {
-                // keep trying
-            }
+            $response = null;
+            $stream = $this->client->getStream($host);
+            $conn = $stream['stream'];
+            $attempt = 0;
+            do {
+                try {
+                    $retry = false;
+                    $encoder = new \Kafka\Protocol\Encoder($conn);
+                    $encoder->metadataRequest($topics);
+                    $decoder = new \Kafka\Protocol\Decoder($conn);
+                    $response = $decoder->metadataResponse();
+                    $this->client->freeStream($stream['key']);
+                } catch(\Exception $e) {
+                    $attempt++;
+                    if ($attempt > 2) {
+                        $response = null;
+                    }
+                    $retry = true;
+                }
+            } while($retry);
         }
         if ($response) {
             // Merge arrays using "+" operator to preserve key (which are broker IDs)
