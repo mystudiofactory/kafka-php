@@ -174,7 +174,7 @@ class MetaDataFromKafka implements ClusterMetaData
             $response = null;
             $stream = $this->client->getStream($host);
             $conn = $stream['stream'];
-            $attempt = 0;
+            $attempts = 0;
             do {
                 try {
                     $retry = false;
@@ -184,11 +184,13 @@ class MetaDataFromKafka implements ClusterMetaData
                     $response = $decoder->metadataResponse();
                     $this->client->freeStream($stream['key']);
                 } catch(\Exception $e) {
-                    $attempt++;
-                    if ($attempt > 2) {
+                    $attempts++;
+                    if ($attempts > 2) {
                         $response = null;
                     }
-                    $retry = true;
+                    else {
+                        $retry = true;
+                    }
                 }
             } while($retry);
         }
