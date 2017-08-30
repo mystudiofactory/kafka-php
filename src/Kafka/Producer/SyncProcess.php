@@ -31,6 +31,8 @@ class SyncProcess
     use \Psr\Log\LoggerAwareTrait;
     use \Kafka\LoggerTrait;
 
+    protected $brokerId;
+
     // {{{ consts
     // }}}
     // {{{ members
@@ -42,6 +44,7 @@ class SyncProcess
     {
         // init protocol
         $config = \Kafka\ProducerConfig::getInstance();
+        $this->brokerId = $config->getClientId();
         \Kafka\Protocol::init($config->getBrokerVersion(), $this->logger);
         $this->syncMeta();
     }
@@ -51,7 +54,7 @@ class SyncProcess
 
     public function send($data)
     {
-        $broker = \Kafka\Broker::getInstance();
+        $broker = \Kafka\Broker::getInstance($this->brokerId);
         $requiredAck = \Kafka\ProducerConfig::getInstance()->getRequiredAck();
         $timeout = \Kafka\ProducerConfig::getInstance()->getTimeout();
 
@@ -110,7 +113,7 @@ class SyncProcess
             throw new \Kafka\Exception('Not set config `metadataBrokerList`');
         }
         shuffle($brokerHost);
-        $broker = \Kafka\Broker::getInstance();
+        $broker = \Kafka\Broker::getInstance($this->brokerId);
         foreach ($brokerHost as $host) {
             $socket = $broker->getMetaConnect($host, true);
             if ($socket) {
@@ -125,7 +128,7 @@ class SyncProcess
                 if (!isset($result['brokers']) || !isset($result['topics'])) {
                     throw new \Kafka\Exception('Get metadata is fail, brokers or topics is null.');
                 } else {
-                    $broker = \Kafka\Broker::getInstance();
+                    $broker = \Kafka\Broker::getInstance($this->brokerId);
                     $broker->setData($result['topics'], $result['brokers']);
                 }
                 return;
@@ -140,7 +143,7 @@ class SyncProcess
     protected function convertMessage($data)
     {
         $sendData = array();
-        $broker = \Kafka\Broker::getInstance();
+        $broker = \Kafka\Broker::getInstance($this->brokerId);
         $topicInfos = $broker->getTopics();
         foreach ($data as $value) {
             if (!isset($value['topic']) || !trim($value['topic'])) {
@@ -186,7 +189,7 @@ class SyncProcess
             } else {
                 $partition['messages'][] = $value['value'];
             }
-            
+
             $topicData['partitions'][$partId] = $partition;
             $topicData['topic_name'] = $value['topic'];
             $sendData[$brokerId][$value['topic']] = $topicData;

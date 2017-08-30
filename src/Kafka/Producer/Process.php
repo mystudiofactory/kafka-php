@@ -37,6 +37,8 @@ class Process
 
     protected $producer = null;
 
+    protected $brokerId;
+
     protected $isRunning = true;
 
     protected $success = null;
@@ -68,7 +70,8 @@ class Process
         \Kafka\Protocol::init($config->getBrokerVersion(), $this->logger);
 
         // init process request
-        $broker = \Kafka\Broker::getInstance();
+        $this->brokerId = $config->getClientId();
+        $broker = \Kafka\Broker::getInstance($this->brokerId);
         $broker->setProcess(function ($data, $fd) {
             $this->processRequest($data, $fd);
         });
@@ -179,7 +182,7 @@ class Process
             throw new \Kafka\Exception('Not set config `metadataBrokerList`');
         }
         shuffle($brokerHost);
-        $broker = \Kafka\Broker::getInstance();
+        $broker = \Kafka\Broker::getInstance($this->brokerId);
         foreach ($brokerHost as $host) {
             $socket = $broker->getMetaConnect($host);
             if ($socket) {
@@ -212,7 +215,7 @@ class Process
                 $this->error('Get metadata is fail, brokers or topics is null.');
                 $this->state->failRun(\Kafka\Producer\State::REQUEST_METADATA);
             } else {
-                $broker = \Kafka\Broker::getInstance();
+                $broker = \Kafka\Broker::getInstance($this->brokerId);
                 $isChange = $broker->setData($result['topics'], $result['brokers']);
                 $this->state->succRun(\Kafka\Producer\State::REQUEST_METADATA, $isChange);
             }
@@ -232,7 +235,7 @@ class Process
     protected function produce()
     {
         $context = array();
-        $broker = \Kafka\Broker::getInstance();
+        $broker = \Kafka\Broker::getInstance($this->brokerId);
         $requiredAck = \Kafka\ProducerConfig::getInstance()->getRequiredAck();
         $timeout = \Kafka\ProducerConfig::getInstance()->getTimeout();
 
@@ -324,7 +327,7 @@ class Process
     protected function convertMessage($data)
     {
         $sendData = array();
-        $broker = \Kafka\Broker::getInstance();
+        $broker = \Kafka\Broker::getInstance($this->brokerId);
         $topicInfos = $broker->getTopics();
         foreach ($data as $value) {
             if (!isset($value['topic']) || !trim($value['topic'])) {
@@ -370,7 +373,7 @@ class Process
             } else {
                 $partition['messages'][] = $value['value'];
             }
-            
+
             $topicData['partitions'][$partId] = $partition;
             $topicData['topic_name'] = $value['topic'];
             $sendData[$brokerId][$value['topic']] = $topicData;

@@ -52,8 +52,8 @@ abstract class Config
     {
         if (strpos($name, 'get') === 0 || strpos($name, 'iet') === 0) {
             $option = strtolower(substr($name, 3, 1)) . substr($name, 4);
-            if (isset(self::$options[$option])) {
-                return self::$options[$option];
+            if (isset(static::$options[$option])) {
+                return static::$options[$option];
             }
 
             if (isset(self::$defaults[$option])) {

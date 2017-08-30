@@ -34,6 +34,7 @@ class ProducerConfig extends Config
     // {{{ members
 
     protected static $defaults = array(
+        'clientId' => 'kafka-php-producer',
         'requiredAck' => 1,
         'timeout' => 5000,
         'isAsyn' => false,

@@ -32,7 +32,7 @@ class Assignment
     // {{{ consts
     // }}}
     // {{{ members
-    
+
     private $memberId = '';
 
     private $generationId = '';
@@ -99,7 +99,8 @@ class Assignment
 
     public function assign($result)
     {
-        $broker = \Kafka\Broker::getInstance();
+        $config = \Kafka\ConsumerConfig::getInstance();
+        $broker = \Kafka\Broker::getInstance($config->getClientId());
         $topics = $broker->getTopics();
 
         $memberCount = count($result);

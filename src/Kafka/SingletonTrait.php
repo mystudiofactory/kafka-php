@@ -34,27 +34,19 @@ trait SingletonTrait
     // }}}
     // {{{ members
 
-    protected static $instance = null;
+    protected static $instances = [];
 
     // }}}
     // {{{ functions
     // {{{ public function static getInstance()
 
-    /**
-     * set send messages
-     *
-     * @access public
-     * @param $hostList
-     * @param null $timeout
-     * @return Consumer
-     */
-    public static function getInstance()
+    public static function getInstance($key = 'default')
     {
-        if (is_null(self::$instance)) {
-            static::$instance = new static();
+        if (!array_key_exists($key, static::$instances)) {
+            static::$instances[$key] = new static();
         }
 
-        return static::$instance;
+        return static::$instances[$key];
     }
 
     // }}}

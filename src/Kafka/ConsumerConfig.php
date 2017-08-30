@@ -34,6 +34,7 @@ class ConsumerConfig extends Config
     // {{{ members
 
     protected static $defaults = array(
+        'clientId' => 'kafka-php-consumer',
         'groupId' => '',
         'sessionTimeout' => 30000,
         'rebalanceTimeout' => 30000,
