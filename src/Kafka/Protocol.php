@@ -85,14 +85,22 @@ class Protocol
     // }}}
     // {{{ members
 
+    static protected $init = false;
+
     protected static $objects = array();
+
 
     // }}}
     // {{{ functions
     // {{{ public static function init()
-    
+
     public static function init($version, $logger = null)
     {
+        if (static::$init) {
+            return;
+        }
+        static::$init = true;
+
         $class = array(
             \Kafka\Protocol\Protocol::PRODUCE_REQUEST => 'Produce',
             \Kafka\Protocol\Protocol::FETCH_REQUEST => 'Fetch',

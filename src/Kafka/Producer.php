@@ -34,8 +34,10 @@ class Producer
     // {{{ consts
     // }}}
     // {{{ members
-    
+
     private $process = null;
+
+    protected $producer = null;
 
     // }}}
     // {{{ functions
@@ -50,10 +52,20 @@ class Producer
      */
     public function __construct(\Closure $producer = null)
     {
-        if (is_null($producer)) {
+        $this->producer = $producer;
+        $this->reconnect();
+    }
+
+    public function reconnect()
+    {
+        // remove the previous broker
+        $config = \Kafka\ProducerConfig::getInstance();
+        \Kafka\Broker::removeInstance($config->getClientId());
+
+        if (is_null($this->producer)) {
             $this->process = new \Kafka\Producer\SyncProcess();
         } else {
-            $this->process = new \Kafka\Producer\Process($producer);
+            $this->process = new \Kafka\Producer\Process($this->producer);
         }
     }
 
