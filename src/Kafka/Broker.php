@@ -150,7 +150,7 @@ class Broker
 
     // }}}
     // {{{ public function getDataConnect()
-    
+
     public function getDataConnect($key, $modeSync = false)
     {
         return $this->getConnect($key, 'dataSockets', $modeSync);
@@ -243,4 +243,12 @@ class Broker
 
     // }}}
     // }}}
+
+    public static function removeInstance($key = 'default')
+    {
+        if (array_key_exists($key, static::$instances)) {
+            static::$instances[$key]->clear();
+            unset(static::$instances[$key]);
+        }
+    }
 }

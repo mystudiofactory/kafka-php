@@ -49,13 +49,6 @@ trait SingletonTrait
         return static::$instances[$key];
     }
 
-    public static function removeInstance($key = 'default')
-    {
-        if (array_key_exists($key, static::$instances)) {
-            unset(static::$instances[$key]);
-        }
-    }
-
     // }}}
     // {{{ private function __construct()
 
