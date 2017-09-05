@@ -32,8 +32,6 @@ abstract class Config
     // }}}
     // {{{ members
 
-    protected static $options = array();
-
     private static $defaults = array(
         'clientId' => 'kafka-php',
         'brokerVersion' => '0.10.1.0',
@@ -190,4 +188,9 @@ abstract class Config
 
     // }}}
     // }}}
+
+    public function toArray()
+    {
+        return static::$options;
+    }
 }

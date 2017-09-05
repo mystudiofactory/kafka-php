@@ -33,6 +33,8 @@ class ConsumerConfig extends Config
     // }}}
     // {{{ members
 
+    protected static $options = array();
+
     protected static $defaults = array(
         'clientId' => 'kafka-php-consumer',
         'groupId' => '',

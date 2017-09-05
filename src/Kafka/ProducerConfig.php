@@ -33,6 +33,8 @@ class ProducerConfig extends Config
     // }}}
     // {{{ members
 
+    protected static $options = array();
+
     protected static $defaults = array(
         'clientId' => 'kafka-php-producer',
         'requiredAck' => 1,

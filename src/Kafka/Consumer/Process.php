@@ -37,6 +37,8 @@ class Process
 
     protected $consumer = null;
 
+    protected $consumerEnd = null;
+
     protected $brokerId;
 
     protected $isRunning = true;
@@ -729,6 +731,10 @@ class Process
                 }
             }
         }
+        if ($this->consumerEnd) {
+            call_user_func($this->consumerEnd, $this->messages);
+        }
+
         $this->messages = array();
     }
 
@@ -790,4 +796,15 @@ class Process
 
     // }}}
     // }}}
+
+    /**
+     * Add a callback when all the messages fetched have been processed
+     * @param \Closure $consumerEnd
+     * @return \Kafka\Consumer\Process
+     */
+    public function setConsumerEnd(\Closure $consumerEnd)
+    {
+        $this->consumerEnd = $consumerEnd;
+        return $this;
+    }
 }

@@ -34,8 +34,10 @@ class Consumer
     // {{{ consts
     // }}}
     // {{{ members
-    
+
     private $isRunning = false;
+
+    protected $consumerEnd = null;
 
     // }}}
     // {{{ functions
@@ -68,6 +70,11 @@ class Consumer
             return;
         }
         $process = new \Kafka\Consumer\Process($consumer);
+
+        if (isset($this->consumerEnd)) {
+            $process->setConsumerEnd($this->consumerEnd);
+        }
+
         if ($this->logger) {
             $process->setLogger($this->logger);
         }
@@ -80,4 +87,15 @@ class Consumer
 
     // }}}
     // }}}
+
+    /**
+     * Add a callback when all the messages fetched have been processed
+     * @param \Closure $consumerEnd
+     * @return \Kafka\Consumer
+     */
+    public function setConsumerEnd(\Closure $consumerEnd)
+    {
+        $this->consumerEnd = $consumerEnd;
+        return $this;
+    }
 }
