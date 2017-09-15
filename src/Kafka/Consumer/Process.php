@@ -565,16 +565,19 @@ class Process
         $consumerOffsets = $assign->getConsumerOffsets();
         $lastOffsets = $assign->getLastOffsets();
         if (empty($consumerOffsets)) {
+
             $consumerOffsets = $assign->getFetchOffsets();
-            foreach ($consumerOffsets as $topic => $value) {
-                foreach ($value as $partId => $offset) {
-                    if (isset($lastOffsets[$topic][$partId]) && $lastOffsets[$topic][$partId] > $offset) {
-                        $consumerOffsets[$topic][$partId] = $offset + 1;
-                    }
-                }
-            }
+// With this code the first message is skipped
+//             foreach ($consumerOffsets as $topic => $value) {
+//                 foreach ($value as $partId => $offset) {
+//                     if (isset($lastOffsets[$topic][$partId]) && $lastOffsets[$topic][$partId] > $offset) {
+//                         $consumerOffsets[$topic][$partId] = $offset + 1;
+//                     }
+//                 }
+//             }
             $assign->setConsumerOffsets($consumerOffsets);
             $assign->setCommitOffsets($assign->getFetchOffsets());
+            $this->info('Consumer ready to consume from offsets ' . json_encode($consumerOffsets));
         }
         $this->state->succRun(\Kafka\Consumer\State::REQUEST_FETCH_OFFSET);
     }
