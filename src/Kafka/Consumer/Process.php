@@ -587,7 +587,9 @@ class Process
 
     protected function fetch()
     {
-        $this->messages = array();
+// Messages are reset in succCommit
+// Some messages could be lost if the messages array is reset here
+//         $this->messages = array();
         $context = array();
         $broker = \Kafka\Broker::getInstance($this->brokerId);
         $topics = \Kafka\Consumer\Assignment::getInstance()->getTopics();
