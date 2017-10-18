@@ -400,6 +400,29 @@ class Process
         $assign->setTopics($brokerToTopics);
     }
 
+    public function leaveGroup()
+    {
+        $broker = \Kafka\Broker::getInstance($this->brokerId);
+        $groupBrokerId = $broker->getGroupBrokerId();
+        $connect = $broker->getMetaConnect($groupBrokerId);
+        if (!$connect) {
+            return;
+        }
+
+        $topics = \Kafka\ConsumerConfig::getInstance()->getTopics();
+        $assign = \Kafka\Consumer\Assignment::getInstance();
+        $memberId = $assign->getMemberId();
+
+        $params = array(
+            'group_id' => \Kafka\ConsumerConfig::getInstance()->getGroupId(),
+            'member_id' => $memberId
+        );
+
+        $requestData = \Kafka\Protocol::encode(\Kafka\Protocol::LEAVE_GROUP_REQUEST, $params);
+        $this->debug("Leave group start, params:" . json_encode($params));
+        $connect->write($requestData);
+    }
+
     // }}}
     // {{{ protected function heartbeat()
 
@@ -811,5 +834,10 @@ class Process
     {
         $this->consumerEnd = $consumerEnd;
         return $this;
+    }
+
+    public function __destruct()
+    {
+        $this->leaveGroup();
     }
 }

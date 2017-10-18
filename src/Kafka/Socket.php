@@ -405,7 +405,7 @@ class Socket
 
     // }}}
     // {{{ protected function isSocketDead()
-    
+
     /**
      * check the stream is close
      *
@@ -418,4 +418,11 @@ class Socket
 
     // }}}
     // }}}
+
+    public function __destruct()
+    {
+        if (is_resource($this->stream)) {
+            fclose($this->stream);
+        }
+    }
 }
