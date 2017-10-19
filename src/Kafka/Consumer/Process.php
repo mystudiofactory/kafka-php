@@ -419,8 +419,12 @@ class Process
         );
 
         $requestData = \Kafka\Protocol::encode(\Kafka\Protocol::LEAVE_GROUP_REQUEST, $params);
-        $this->debug("Leave group start, params:" . json_encode($params));
-        $connect->write($requestData);
+        if ($connect->write($requestData)) {
+            $this->info("Leave group start, params:" . json_encode($params));
+        }
+        else {
+            $this->warning("Failed to leave group start, params:" . json_encode($params));
+        }
     }
 
     // }}}

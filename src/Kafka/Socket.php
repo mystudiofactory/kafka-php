@@ -401,6 +401,7 @@ class Socket
             $this->reconnet();
         }
         $this->writeBuffer = substr($this->writeBuffer, $bytesWritten);
+        return $bytesWritten;
     }
 
     // }}}
