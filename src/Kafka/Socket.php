@@ -247,11 +247,17 @@ class Socket
         stream_set_read_buffer($this->stream, 0);
 
         $this->readWatcher = \Amp\onReadable($this->stream, function () {
+            $i = 0;
             do {
                 $newData = @fread($this->stream, self::READ_MAX_LEN);
                 if ($newData) {
                     $this->read($newData);
                 }
+                elseif ($i == 0 && $this->isSocketDead()) {
+                    error_log('Kafka connection has been lost');
+                    $this->reconnect();
+                }
+                $i++;
             } while ($newData);
         });
 
@@ -398,7 +404,7 @@ class Socket
         } elseif ($bytesWritten >= 0) {
             \Amp\enable($this->writeWatcher);
         } elseif ($this->isSocketDead($this->stream)) {
-            $this->reconnet();
+            $this->reconnect();
         }
         $this->writeBuffer = substr($this->writeBuffer, $bytesWritten);
         return $bytesWritten;
